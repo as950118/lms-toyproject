@@ -1,8 +1,20 @@
 from django.db import models
 
-# Create your models here.
-from django.db import models
+class Level(models.Model):
+    level_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.name
+
+class Grade(models.Model):
+    grade_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=20, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
 
 class User(models.Model):
     ROLE_CHOICES = [
@@ -19,17 +31,15 @@ class User(models.Model):
     def __str__(self):
         return f"{self.name} ({self.role})"
 
-
 class Group(models.Model):
     group_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    level = models.CharField(max_length=50)
-    grade = models.CharField(max_length=20)
+    level = models.ForeignKey(Level, on_delete=models.PROTECT, related_name='groups')
+    grade = models.ForeignKey(Grade, on_delete=models.PROTECT, related_name='groups')
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='groups')
 
     def __str__(self):
         return self.name
-
 
 class GroupStudent(models.Model):
     group_student_id = models.AutoField(primary_key=True)
@@ -37,9 +47,11 @@ class GroupStudent(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='student_groups')
     joined_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('group', 'student')
+
     def __str__(self):
         return f"{self.student.name} in {self.group.name}"
-
 
 class Feed(models.Model):
     FEED_TYPE_CHOICES = [
@@ -53,12 +65,42 @@ class Feed(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     feed_type = models.CharField(max_length=20, choices=FEED_TYPE_CHOICES)
-    content_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
+class VideoFeed(models.Model):
+    feed = models.OneToOneField(Feed, on_delete=models.CASCADE, primary_key=True, related_name='video_detail')
+    video_url = models.URLField()
+    duration_seconds = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"VideoFeed for {self.feed.title}"
+
+class QuizFeed(models.Model):
+    QUESTION_TYPE_CHOICES = [
+        ('multiple_choice', 'Multiple Choice'),
+        ('grammar', 'Grammar'),
+        # 필요시 추가
+    ]
+    feed = models.OneToOneField(Feed, on_delete=models.CASCADE, primary_key=True, related_name='quiz_detail')
+    question = models.TextField()
+    question_type = models.CharField(max_length=30, choices=QUESTION_TYPE_CHOICES)
+    options = models.JSONField()  # 예: ["A", "B", "C", "D"]
+    answer = models.CharField(max_length=200)
+
+    def __str__(self):
+        return f"QuizFeed for {self.feed.title}"
+
+class FeedSchedule(models.Model):
+    schedule_id = models.AutoField(primary_key=True)
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name='schedules')
+    scheduled_time = models.DateTimeField()
+    duration_minutes = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"Schedule for {self.feed.title} at {self.scheduled_time}"
 
 class FeedResult(models.Model):
     STATUS_CHOICES = [
@@ -73,5 +115,23 @@ class FeedResult(models.Model):
     score = models.IntegerField(blank=True, null=True)
     submitted_at = models.DateTimeField(blank=True, null=True)
 
+    class Meta:
+        unique_together = ('feed', 'student')
+
     def __str__(self):
         return f"{self.feed.title} - {self.student.name} ({self.status})"
+
+class VideoResult(models.Model):
+    feed_result = models.OneToOneField(FeedResult, on_delete=models.CASCADE, primary_key=True, related_name='video_result')
+    watch_time_seconds = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"VideoResult for {self.feed_result}"
+
+class QuizResult(models.Model):
+    feed_result = models.OneToOneField(FeedResult, on_delete=models.CASCADE, primary_key=True, related_name='quiz_result')
+    selected_answer = models.CharField(max_length=200)
+    is_correct = models.BooleanField()
+
+    def __str__(self):
+        return f"QuizResult for {self.feed_result}"
