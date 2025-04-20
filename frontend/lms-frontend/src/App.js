@@ -1,24 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import TeacherGroupManagement from "./pages/TeacherGroupManagement";
+// import StudentDashboard from "./pages/StudentDashboard"; // 학생화면 추가시
 
 function App() {
+  // 예시: teacherId를 임시로 1로 지정 (실제론 로그인 정보에서 받아야 함)
+  const teacherId = 1;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <BrowserRouter>
+        <Routes>
+          <Route
+              path="/teacher/groups"
+              element={<TeacherGroupManagement teacherId={teacherId} />}
+          />
+          {/* <Route path="/student/dashboard" element={<StudentDashboard />} /> */}
+          {/* 다른 라우트도 추가 가능 */}
+          <Route path="*" element={<div>404 Not Found</div>} />
+        </Routes>
+      </BrowserRouter>
   );
 }
 
