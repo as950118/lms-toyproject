@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {Link, useParams} from "react-router-dom";
 
 /**
  * 선생님 그룹 관리 페이지
@@ -10,7 +11,8 @@ import axios from "axios";
  * @param {Object} props
  * @param {number} props.teacherId - 현재 로그인한 선생님의 user_id
  */
-function TeacherGroupManagement({ teacherId }) {
+function TeacherGroupManagement({}) {
+    const { teacherId } = useParams();
     const [groups, setGroups] = useState([]);
     const [newGroup, setNewGroup] = useState({ name: "", level: "", grade: "" });
     const [loading, setLoading] = useState(false);
@@ -66,69 +68,73 @@ function TeacherGroupManagement({ teacherId }) {
 
     return (
         <div style={{ maxWidth: 600, margin: "0 auto" }}>
-    <h2>내 그룹 관리</h2>
-    <form onSubmit={handleCreateGroup} style={{ marginBottom: 20 }}>
-    <input
-        type="text"
-    placeholder="그룹명"
-    value={newGroup.name}
-    onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-    required
-    />
-    <input
-        type="text"
-    placeholder="수준(예: 초급)"
-    value={newGroup.level}
-    onChange={(e) => setNewGroup({ ...newGroup, level: e.target.value })}
-    required
-    />
-    <input
-        type="text"
-    placeholder="학년"
-    value={newGroup.grade}
-    onChange={(e) => setNewGroup({ ...newGroup, grade: e.target.value })}
-    required
-    />
-    <button type="submit" style={{ marginLeft: 10 }}>그룹 생성</button>
-    </form>
-    {loading ? (
-        <div>로딩중...</div>
-    ) : (
-        <table border="1" cellPadding="8" style={{ width: "100%" }}>
-        <thead>
-            <tr>
-                <th>그룹명</th>
-        <th>수준</th>
-        <th>학년</th>
-        <th>관리</th>
-        </tr>
-        </thead>
-        <tbody>
-        {groups.map((group) => (
-                <tr key={group.group_id}>
-                    <td>{group.name}</td>
-                    <td>{group.level}</td>
-                    <td>{group.grade}</td>
-                    <td>
-                    {/* 수정 기능은 별도 구현 필요 */}
-                    <button onClick={() => handleDeleteGroup(group.group_id)}>
-        삭제
-        </button>
-        </td>
-        </tr>
-    ))}
-        {groups.length === 0 && (
-            <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-            그룹이 없습니다.
-        </td>
-        </tr>
-        )}
-        </tbody>
-        </table>
-    )}
-    </div>
-);
+            <h2>내 그룹 관리</h2>
+            <form onSubmit={handleCreateGroup} style={{ marginBottom: 20 }}>
+                <input
+                    type="text"
+                    placeholder="그룹명"
+                    value={newGroup.name}
+                    onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="수준(예: 초급)"
+                    value={newGroup.level}
+                    onChange={(e) => setNewGroup({ ...newGroup, level: e.target.value })}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder="학년"
+                    value={newGroup.grade}
+                    onChange={(e) => setNewGroup({ ...newGroup, grade: e.target.value })}
+                    required
+                />
+                <button type="submit" style={{ marginLeft: 10 }}>그룹 생성</button>
+            </form>
+            {loading ? (
+                <div>로딩중...</div>
+            ) : (
+                <table border="1" cellPadding="8" style={{ width: "100%" }}>
+                    <thead>
+                    <tr>
+                        <th>그룹명</th>
+                        <th>수준</th>
+                        <th>학년</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {groups.map((group) => (
+                        <tr key={group.group_id}>
+                            <td>
+                                <Link to={`/teacher/${teacherId}/groups/${group.group_id}/students`}>
+                                    {group.name}
+                                </Link>
+                            </td>
+                            <td>{group.level}</td>
+                            <td>{group.grade}</td>
+                            <td>
+                                {/* 수정 기능은 별도 구현 필요 */}
+                                <button onClick={() => handleDeleteGroup(group.group_id)}>
+                                    삭제
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    {groups.length === 0 && (
+                        <tr>
+                            <td colSpan={4} style={{ textAlign: "center" }}>
+                                그룹이 없습니다.
+                            </td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
+            )}
+        </div>
+    );
 }
 
 export default TeacherGroupManagement;
