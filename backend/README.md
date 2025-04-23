@@ -9,7 +9,7 @@
 | user_id        | INT (PK)  | 사용자 고유 ID              |
 | name           | STRING    | 이름                        |
 | email          | STRING    | 이메일                      |
-| password_hash  | STRING    | 비밀번호 해시               |
+| password       | STRING    | 비밀번호                   |
 | role           | ENUM      | 'teacher', 'student'        |
 | created_at     | DATETIME  | 생성일시                    |
 
@@ -290,10 +290,4 @@ erDiagram
     타입별 상세 정보를 모두 직렬화 저장
     → 스키마 변경 최소화, 유연성 극대화
     단점: JSON 내 필드 제약·인덱싱이 제한적
-
-6.3. 플러그인 아키텍처 + 마이크서비스
-    피드 타입별로 별도 서비스(또는 플러그인) 모듈을 구축
-    공통 인터페이스만 정의하고, 세부 구현은 각 모듈에 위임
-    → 대규모·다양성 많은 시스템에 적합
-    단점: 운영 복잡도, 서비스간 통신 오버헤드
 ```
